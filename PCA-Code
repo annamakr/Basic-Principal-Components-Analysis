@@ -12,7 +12,7 @@ colnames(wdbc)<-c("ID", "Diagnosis","radius","texture", "perimeter","area", "smo
 "compactnessW", "concavityW", "concave_pointsW", "symmetryW", "fractal_dimensionW")
 
 
-## Επιλογή πίνακα διακύμανσης ή πίνακα συσχέτισης
+## Choose variance or correlation matrix
 S<-cov(wdbc[,3:30])
 s.eigen<-eigen(S)
 
@@ -26,12 +26,12 @@ R[upper.tri(R)]<-""
 upper<-as.data.frame(R)
 upper
 
-## Ποσό της διακύμανσης που εξηγείται από τα ιδιοδιανύσματα
+## Proportion of the variance explained by the eigenvectors
 for (r in r.eigen$values) {
   print(r / sum(r.eigen$values))
 }
 
-## Ανάλυση σε κύριες συνιστώσες
+## Performing Principal Components Analysis
 mymodel<-princomp(wdbc[,-c(1,2)],cor=TRUE,scores=TRUE)
 mymodel
 summary(mymodel)
@@ -40,17 +40,17 @@ summary(mymodel)
 mymodel$loadings
 print(mymodel$loadings, cutoff=0.3)
 
-## Scree plot των ιδιοτιμών
+## Scree plot of the eigenvalues
 plot(mymodel, main="PCA model")
 screeplot(mymodel, type="line", main= "Scree Plot")
 
-## Οι κύριες συνιστώσες
+## The Principal Components
 mymodel$scores
 
 ## Biplot των Scores
 biplot(mymodel)
 
-## Κατασκευή του πίνακα με τους συντελεστές των κύριων συνιστωσών
+## Creating the matrix with the components coefficients
 A<-solve(mymodel$loadings)
 nX<-(mymodel$scores[,-c(3:30)] %*% A[-c(3:30),] ) #fully reconstruct the data
 plot(wdbc[,1],nX[,1])
@@ -60,7 +60,7 @@ apply(nnX,2,mean)
 plot(mymodel$scores[,1:2])
 plot(mymodel$scores[,1:2])
 
-#Κανονικοποίηση των δεδομένων - Rescale
+## Data Normalization - Rescale
 nnX<-scale(wdbc[,-c(1,2)],apply(wdbc[,-c(1,2)],2,mean),apply(wdbc[,-c(1,2)],2,sd))
 apply(nnX,2,mean)
 plot(mymodel$scores[,1:2])
