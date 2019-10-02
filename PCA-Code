@@ -1,0 +1,73 @@
+# Libraries
+library(ade4)
+
+## Read the data
+wdbc<-read.table("C:\\Users\\MakropoulouA\\Desktop\\wdbc.txt", sep=",",dec= ".")
+wdbc<-as.data.frame(wdbc)
+colnames(wdbc)<-c("ID", "Diagnosis","radius","texture", "perimeter","area", "smoothness",
+"compactness", "concavity", "concave_points", "symmetry", "fractal_dimension",
+"radiusSE", "textureSE", "perimeterSE", "areaSE", "smoothnessSE",
+"compactnessSE", "concavitySE", "concave_pointsSE", "symmetrySE", "fractal_dimensionSE",
+"radiusW", "textureW", "perimeterW", "areaW", "smoothnessW",
+"compactnessW", "concavityW", "concave_pointsW", "symmetryW", "fractal_dimensionW")
+
+
+## Επιλογή πίνακα διακύμανσης ή πίνακα συσχέτισης
+S<-cov(wdbc[,3:30])
+s.eigen<-eigen(S)
+
+R<-cor(wdbc[,3:30])
+R<-round(R,3)
+
+r.eigen<-eigen(R)
+
+
+R[upper.tri(R)]<-""
+upper<-as.data.frame(R)
+upper
+
+## Ποσό της διακύμανσης που εξηγείται από τα ιδιοδιανύσματα
+for (r in r.eigen$values) {
+  print(r / sum(r.eigen$values))
+}
+
+## Ανάλυση σε κύριες συνιστώσες
+mymodel<-princomp(wdbc[,-c(1,2)],cor=TRUE,scores=TRUE)
+mymodel
+summary(mymodel)
+
+## Τα ιδιοδιανύσματα aka Loadings
+mymodel$loadings
+print(mymodel$loadings, cutoff=0.3)
+
+## Scree plot των ιδιοτιμών
+plot(mymodel, main="PCA model")
+screeplot(mymodel, type="line", main= "Scree Plot")
+
+## Οι κύριες συνιστώσες
+mymodel$scores
+
+## Biplot των Scores
+biplot(mymodel)
+
+## Κατασκευή του πίνακα με τους συντελεστές των κύριων συνιστωσών
+A<-solve(mymodel$loadings)
+nX<-(mymodel$scores[,-c(3:30)] %*% A[-c(3:30),] ) #fully reconstruct the data
+plot(wdbc[,1],nX[,1])
+
+nnX<-scale(wdbc[,-c(1,2)],apply(wdbc[,-c(1,2)],2,mean),apply(wdbc[,-c(1,2)],2,sd))
+apply(nnX,2,mean)
+plot(mymodel$scores[,1:2])
+plot(mymodel$scores[,1:2])
+
+#Κανονικοποίηση των δεδομένων - Rescale
+nnX<-scale(wdbc[,-c(1,2)],apply(wdbc[,-c(1,2)],2,mean),apply(wdbc[,-c(1,2)],2,sd))
+apply(nnX,2,mean)
+plot(mymodel$scores[,1:2])
+
+cor(mymodel$scores[,1],wdbc[,-c(1,2)])
+
+
+boxplot(mymodel$scores[,1],mymodel$scores[,2],
+        mymodel$scores[,3],mymodel$scores[,4],
+        mymodel$scores[,5],mymodel$scores[,6])
